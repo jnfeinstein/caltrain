@@ -37,7 +37,7 @@ sealed class DepartureRecord extends CassandraTable[DepartureRecord, DepartureMo
 
 trait DepartureConnector extends SimpleCassandraConnector {
   implicit val keySpace = KeySpace("caltrain")
-  override val manager = new DefaultCassandraManager( Set(new InetSocketAddress("localhost", 9042) ) )
+  override val manager = new DefaultCassandraManager( Set(new InetSocketAddress( System.getenv("CASSANDRA_HOST"), 9042) ) )
 }
 
 object DepartureRecord extends DepartureRecord with DepartureConnector {
