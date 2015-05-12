@@ -1,0 +1,8 @@
+/bin/
+**/target/
+log/
+.cache
+.classpath
+.project
+
+dump.txt
