@@ -61,10 +61,8 @@ object DepartureRecord extends DepartureRecord with DepartureConnector {
   }
 
   def insertDepartures(models: Seq[DepartureModel]): ScalaFuture[ResultSet] = {
-    val op = Batch.unlogged
-
-    models.foreach{ model => op.add( insertDepartureQuery(model) ) }
-
-    op.future()
+    models.foldLeft(Batch.unlogged) { (op, model) =>
+      op.add( insertDepartureQuery(model) )
+    }.future()
   }
 }
