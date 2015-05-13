@@ -1,6 +1,8 @@
 package org.caltrain
 
 import com.websudos.phantom.connectors.{KeySpace, SimpleCassandraConnector, DefaultCassandraManager}
+import com.websudos.phantom.builder.Unspecified
+import com.websudos.phantom.builder.query._
 import com.websudos.phantom.dsl._
 import com.websudos.phantom.Manager
 import java.net.InetSocketAddress
@@ -45,13 +47,24 @@ trait DepartureConnector extends SimpleCassandraConnector {
 object DepartureRecord extends DepartureRecord with DepartureConnector {
   override lazy val tableName = "departure_samples"
 
-  def insertDeparture(model: DepartureModel): ScalaFuture[ResultSet] = {
+  def insertDepartureQuery(model: DepartureModel): InsertQuery[DepartureRecord, DepartureModel, Unspecified] = {
     insert.value(_.agencyName, model.agencyName.toLowerCase)
       .value(_.routeName, model.routeName.toLowerCase)
       .value(_.directionName, model.directionName.toLowerCase)
       .value(_.stopName, model.stopName.toLowerCase)
       .value(_.timestamp, model.timestamp)
       .value(_.departures, model.departures.to[List])
-      .future()
+  }
+
+  def insertDeparture(model: DepartureModel): ScalaFuture[ResultSet] = {
+    insertDepartureQuery(model).future()
+  }
+
+  def insertDepartures(models: Seq[DepartureModel]): ScalaFuture[ResultSet] = {
+    val op = Batch.unlogged
+
+    models.foreach{ model => op.add( insertDepartureQuery(model) ) }
+
+    op.future()
   }
 }

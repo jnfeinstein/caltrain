@@ -24,27 +24,36 @@ object Main {
 
     println("Polling - " + now)
 
-    agency.routes.foreach{ r: Route =>
+    val departures = agency.routes.map{ r: Route =>
 
-      r.directions.foreach{ dir: Direction =>
+      r.directions.map{ dir: Direction =>
 
-        dir.stops.foreach{ s: Stop =>
-          val departures = s.departures.sortBy{ _.time }.map{ _.time }
-          val model = new DepartureModel(
+        dir.stops.map{ s: Stop =>
+          new DepartureModel(
             agency.toString,
             r.toString,
             dir.toString,
             s.toString,
             now,
-            departures
+            s.departures.sortBy{ _.time }.map{ _.time }
           )
-          println("Inserting " + Array(now, agency, r, dir, s, departures.mkString("/")).mkString(","))
-          DepartureRecord.insertDeparture(model)
         }
 
-      }
+      }.flatten
 
+    }.flatten
+
+    departures.foreach{ d =>
+      println("Inserting " +
+        Array(now,
+          d.agencyName,
+          d.directionName,
+          d.stopName,
+          d.routeName,
+          d.departures.mkString("/")).mkString(","))
     }
+
+    DepartureRecord.insertDepartures(departures)
 
   }
 
