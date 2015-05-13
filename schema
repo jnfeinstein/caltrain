@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS caltrain.departure_samples (
   stopCode text,
   timestamp timestamp,
   departures list<int>,
-  PRIMARY KEY ( agencyName, stopCode, directionCode, routeCode, timestamp) )
+  PRIMARY KEY ( agencyName, stopCode, directionCode, timestamp, routeCode) )
   WITH compression = { 'sstable_compression' : 'LZ4Compressor' } ;

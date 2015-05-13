@@ -24,9 +24,9 @@ object Main {
 
     println("Polling - " + now)
 
-    val departures = agency.routes.map{ r: Route =>
+    agency.routes.map{ r: Route =>
 
-      r.directions.map{ dir: Direction =>
+      val departures = r.directions.map{ dir: Direction =>
 
         dir.stops.map{ s: Stop =>
           new DepartureModel(
@@ -41,19 +41,19 @@ object Main {
 
       }.flatten
 
-    }.flatten
+      departures.foreach{ d =>
+        println("Inserting " +
+          Array(now,
+            d.agencyName,
+            d.directionCode,
+            d.stopCode,
+            d.routeCode,
+            d.departures.mkString("/")).mkString(","))
+      }
 
-    departures.foreach{ d =>
-      println("Inserting " +
-        Array(now,
-          d.agencyName,
-          d.directionCode,
-          d.stopCode,
-          d.routeCode,
-          d.departures.mkString("/")).mkString(","))
+      DepartureRecord.insertDepartures(departures)
+
     }
-
-    DepartureRecord.insertDepartures(departures)
 
   }
 
