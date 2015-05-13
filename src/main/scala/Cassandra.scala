@@ -46,10 +46,10 @@ object DepartureRecord extends DepartureRecord with DepartureConnector {
   override lazy val tableName = "departure_samples"
 
   def insertDeparture(model: DepartureModel): ScalaFuture[ResultSet] = {
-    insert.value(_.agencyName, model.agencyName)
-      .value(_.routeName, model.routeName)
-      .value(_.directionName, model.directionName)
-      .value(_.stopName, model.stopName)
+    insert.value(_.agencyName, model.agencyName.toLowerCase)
+      .value(_.routeName, model.routeName.toLowerCase)
+      .value(_.directionName, model.directionName.toLowerCase)
+      .value(_.stopName, model.stopName.toLowerCase)
       .value(_.timestamp, model.timestamp)
       .value(_.departures, model.departures.to[List])
       .future()
