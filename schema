@@ -1,0 +1,13 @@
+CREATE KEYSPACE IF NOT EXISTS caltrain
+WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}
+AND durable_writes = true;
+
+CREATE TABLE IF NOT EXISTS caltrain.departure_samples (
+  agencyName text,
+  routeName text,
+  directionName text,
+  stopName text,
+  timestamp timestamp,
+  departures list<int>,
+  PRIMARY KEY ( agencyName, directionName, stopName, timestamp, routeName) )
+  WITH compression = { 'sstable_compression' : 'LZ4Compressor' } ;
