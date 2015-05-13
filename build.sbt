@@ -21,3 +21,6 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-simple" % "1.7.12",
   "org.xerial.snappy" % "snappy-java" % "1.1.2-RC1"
 )
+
+val githubUrl = url("https://raw.githubusercontent.com/jnfeinstein/scala-511/master/releases")
+resolvers += Resolver.url("scala-511", githubUrl)(Resolver.ivyStylePatterns)
