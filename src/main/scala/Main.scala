@@ -30,18 +30,16 @@ object Main {
 
         dir.stops.foreach{ s: Stop =>
           val departures = s.departures.sortBy{ _.time }.map{ _.time }
-          if ( !departures.isEmpty ) {
-            val model = new DepartureModel(
-              agency.toString,
-              r.toString,
-              dir.toString,
-              s.toString,
-              now,
-              departures
-            )
-            println("Inserting " + Array(now, agency, r, dir, s, departures.mkString("/")).mkString(","))
-            DepartureRecord.insertDeparture(model)
-          }
+          val model = new DepartureModel(
+            agency.toString,
+            r.toString,
+            dir.toString,
+            s.toString,
+            now,
+            departures
+          )
+          println("Inserting " + Array(now, agency, r, dir, s, departures.mkString("/")).mkString(","))
+          DepartureRecord.insertDeparture(model)
         }
 
       }
