@@ -6,6 +6,10 @@ scalaVersion := "2.11.6"
 
 val phantomVersion = "1.8.0"
 
+assemblyJarName in assembly := "caltrain.jar"
+
+mainClass in assembly := Some("org.caltrain.Main")
+
 libraryDependencies ++= Seq(
   "com.websudos" % "phantom_2.11" % phantomVersion,
   "com.websudos"  %% "phantom-dsl" % phantomVersion,

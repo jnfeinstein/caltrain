@@ -1,3 +1,5 @@
+package org.caltrain
+
 import com.websudos.phantom.connectors.{KeySpace, SimpleCassandraConnector, DefaultCassandraManager}
 import com.websudos.phantom.dsl._
 import com.websudos.phantom.Manager

@@ -1,3 +1,5 @@
+package org.caltrain
+
 import org.five11._
 import org.joda.time.DateTime
 
