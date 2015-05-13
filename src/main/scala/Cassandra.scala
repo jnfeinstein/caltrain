@@ -48,10 +48,10 @@ object DepartureRecord extends DepartureRecord with DepartureConnector {
   override lazy val tableName = "departure_samples"
 
   def insertDepartureQuery(model: DepartureModel): InsertQuery[DepartureRecord, DepartureModel, Unspecified] = {
-    insert.value(_.agencyName, model.agencyName.toLowerCase)
-      .value(_.routeCode, model.routeCode.toLowerCase)
-      .value(_.directionCode, model.directionCode.toLowerCase)
-      .value(_.stopCode, model.stopCode.toLowerCase)
+    insert.value(_.agencyName, model.agencyName)
+      .value(_.routeCode, model.routeCode)
+      .value(_.directionCode, model.directionCode)
+      .value(_.stopCode, model.stopCode)
       .value(_.timestamp, model.timestamp)
       .value(_.departures, model.departures.to[List])
   }
