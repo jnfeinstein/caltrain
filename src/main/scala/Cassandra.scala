@@ -13,7 +13,7 @@ case class DepartureModel (
   directionName: String,
   stopName: String,
   timestamp: DateTime,
-  departure: Int
+  departures: Seq[Int]
 )
 
 sealed class DepartureRecord extends CassandraTable[DepartureRecord, DepartureModel] {
@@ -23,7 +23,7 @@ sealed class DepartureRecord extends CassandraTable[DepartureRecord, DepartureMo
   object directionName extends StringColumn(this)
   object stopName extends StringColumn(this)
   object timestamp extends DateTimeColumn(this)
-  object departure extends IntColumn(this)
+  object departures extends ListColumn[DepartureRecord, DepartureModel, Int](this)
 
   def fromRow(row: Row): DepartureModel = {
     DepartureModel(
@@ -32,7 +32,7 @@ sealed class DepartureRecord extends CassandraTable[DepartureRecord, DepartureMo
       directionName(row),
       stopName(row),
       timestamp(row),
-      departure(row)
+      departures(row)
     )
   }
 }
@@ -45,13 +45,13 @@ trait DepartureConnector extends SimpleCassandraConnector {
 object DepartureRecord extends DepartureRecord with DepartureConnector {
   override lazy val tableName = "departure_samples"
 
-  def insertDeparture(departure: DepartureModel): ScalaFuture[ResultSet] = {
-    insert.value(_.agencyName, departure.agencyName)
-      .value(_.routeName, departure.routeName)
-      .value(_.directionName, departure.directionName)
-      .value(_.stopName, departure.stopName)
-      .value(_.timestamp, departure.timestamp)
-      .value(_.departure, departure.departure)
+  def insertDeparture(model: DepartureModel): ScalaFuture[ResultSet] = {
+    insert.value(_.agencyName, model.agencyName)
+      .value(_.routeName, model.routeName)
+      .value(_.directionName, model.directionName)
+      .value(_.stopName, model.stopName)
+      .value(_.timestamp, model.timestamp)
+      .value(_.departures, model.departures.to[List])
       .future()
   }
 }

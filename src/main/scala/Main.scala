@@ -20,27 +20,34 @@ object Main {
   }
 
   def poll(implicit agency: Agency) = {
-    val time = DateTime.now
+    val now = DateTime.now
 
-    println("Polling - " + time)
+    println("Polling - " + now)
 
     agency.routes.foreach{ r: Route =>
-      println(r)
 
       r.directions.foreach{ dir: Direction =>
-        println(dir)
 
         dir.stops.foreach{ s: Stop =>
-          println(s)
-
-          s.departures.foreach{ d: Departure =>
-            val departure = new DepartureModel(agency.toString, r.toString, dir.toString, s.toString, time, d.time)
-
-            println("Inserting " + Array(agency, r, dir, s, time, d.time).mkString(","))
-            DepartureRecord.insertDeparture(departure)
+          val departures = s.departures.sortBy{ _.time }.map{ _.time }
+          if ( !departures.isEmpty ) {
+            val model = new DepartureModel(
+              agency.toString,
+              r.toString,
+              dir.toString,
+              s.toString,
+              now,
+              departures
+            )
+            println("Inserting " + Array(now, agency, r, dir, s, departures.mkString("/")).mkString(","))
+            DepartureRecord.insertDeparture(model)
           }
         }
+
       }
+
     }
+
   }
+
 }
