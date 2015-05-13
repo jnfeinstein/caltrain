@@ -11,9 +11,9 @@ import scala.concurrent.{ Future => ScalaFuture }
 
 case class DepartureModel (
   agencyName: String,
-  routeName: String,
-  directionName: String,
-  stopName: String,
+  routeCode: String,
+  directionCode: String,
+  stopCode: String,
   timestamp: DateTime,
   departures: Seq[Int]
 )
@@ -21,18 +21,18 @@ case class DepartureModel (
 sealed class DepartureRecord extends CassandraTable[DepartureRecord, DepartureModel] {
 
   object agencyName extends StringColumn(this)
-  object routeName extends StringColumn(this)
-  object directionName extends StringColumn(this)
-  object stopName extends StringColumn(this)
+  object routeCode extends StringColumn(this)
+  object directionCode extends StringColumn(this)
+  object stopCode extends StringColumn(this)
   object timestamp extends DateTimeColumn(this)
   object departures extends ListColumn[DepartureRecord, DepartureModel, Int](this)
 
   def fromRow(row: Row): DepartureModel = {
     DepartureModel(
       agencyName(row),
-      routeName(row),
-      directionName(row),
-      stopName(row),
+      routeCode(row),
+      directionCode(row),
+      stopCode(row),
       timestamp(row),
       departures(row)
     )
@@ -49,9 +49,9 @@ object DepartureRecord extends DepartureRecord with DepartureConnector {
 
   def insertDepartureQuery(model: DepartureModel): InsertQuery[DepartureRecord, DepartureModel, Unspecified] = {
     insert.value(_.agencyName, model.agencyName.toLowerCase)
-      .value(_.routeName, model.routeName.toLowerCase)
-      .value(_.directionName, model.directionName.toLowerCase)
-      .value(_.stopName, model.stopName.toLowerCase)
+      .value(_.routeCode, model.routeCode.toLowerCase)
+      .value(_.directionCode, model.directionCode.toLowerCase)
+      .value(_.stopCode, model.stopCode.toLowerCase)
       .value(_.timestamp, model.timestamp)
       .value(_.departures, model.departures.to[List])
   }

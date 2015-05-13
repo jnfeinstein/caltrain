@@ -31,9 +31,9 @@ object Main {
         dir.stops.map{ s: Stop =>
           new DepartureModel(
             agency.toString,
-            r.toString,
-            dir.toString,
-            s.toString,
+            r.code.toString,
+            dir.code.toString,
+            s.code.toString,
             now,
             s.departures.sortBy{ _.time }.map{ _.time }
           )
@@ -47,9 +47,9 @@ object Main {
       println("Inserting " +
         Array(now,
           d.agencyName,
-          d.directionName,
-          d.stopName,
-          d.routeName,
+          d.directionCode,
+          d.stopCode,
+          d.routeCode,
           d.departures.mkString("/")).mkString(","))
     }
 

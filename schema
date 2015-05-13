@@ -4,10 +4,10 @@ AND durable_writes = true;
 
 CREATE TABLE IF NOT EXISTS caltrain.departure_samples (
   agencyName text,
-  routeName text,
-  directionName text,
-  stopName text,
+  routeCode text,
+  directionCode text,
+  stopCode text,
   timestamp timestamp,
   departures list<int>,
-  PRIMARY KEY ( agencyName, directionName, stopName, timestamp, routeName) )
+  PRIMARY KEY ( agencyName, stopCode, directionCode, routeCode, timestamp) )
   WITH compression = { 'sstable_compression' : 'LZ4Compressor' } ;
