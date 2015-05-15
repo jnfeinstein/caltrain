@@ -30,7 +30,6 @@ object Main {
 
         dir.stops.map{ s: Stop =>
           new DepartureModel(
-            agency.toString,
             r.code.toString,
             dir.code.toString,
             s.code.toString,
@@ -44,15 +43,14 @@ object Main {
       departures.foreach{ d =>
         println("Inserting " +
           Array(now,
-            d.agencyName,
-            d.directionCode,
-            d.stopCode,
-            d.routeCode,
+            d.direction,
+            d.stop,
+            d.route,
             d.departures.mkString("/")).mkString(","))
       }
 
-      DepartureRecord.insertDepartures(departures)
-
+      DepartureRecordByTime.insertDepartures(departures)
+      DepartureRecordByStop.insertDepartures(departures)
     }
 
   }
