@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS caltrain.departure_samples_by_stop (
   stop text,
   timestamp timestamp,
   departures list<int>,
-  PRIMARY KEY (stop, direction, timestamp, route) )
+  PRIMARY KEY ( (stop, direction), timestamp, route) )
   WITH compression = { 'sstable_compression' : 'LZ4Compressor' } ;
 
 CREATE TABLE IF NOT EXISTS caltrain.departure_samples_by_time (
@@ -17,5 +17,5 @@ CREATE TABLE IF NOT EXISTS caltrain.departure_samples_by_time (
   stop text,
   timestamp timestamp,
   departures list<int>,
-  PRIMARY KEY ( timestamp, direction, route, stop) )
+  PRIMARY KEY ( (direction, route), timestamp, stop) )
   WITH compression = { 'sstable_compression' : 'LZ4Compressor' } ;

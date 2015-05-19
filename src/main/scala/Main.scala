@@ -4,9 +4,7 @@ import org.five11._
 import org.joda.time.DateTime
 
 object Main {
-  implicit val token: Api.token = System.getenv("TOKEN")
-
-  val api = new Api
+  val api = new Api( System.getenv("TOKEN") )
 
   def main(args: Array[String]) = {
 
@@ -15,7 +13,7 @@ object Main {
     while (true) {
       poll
       println("Sleeping - " + DateTime.now)
-      Thread.sleep(180000)
+      Thread.sleep(60000)
     }
   }
 
@@ -24,23 +22,27 @@ object Main {
 
     println("Polling - " + now)
 
-    agency.routes.map{ r: Route =>
+    agency.stops.par.foreach{ stop =>
+      val departuresByRoute = stop.departures.groupBy{ _.route }
 
-      val departures = r.directions.map{ dir: Direction =>
+      val departureModels = stop.routes.map{ route =>
+        val departuresByDirection: Map[Direction, Seq[Departure]] = departuresByRoute.get(route) match {
+          case Some(departures) => departures.groupBy{ _.direction }
+          case None => Map()
+        }
 
-        dir.stops.map{ s: Stop =>
-          new DepartureModel(
-            r.code.toString,
-            dir.code.toString,
-            s.code.toString,
-            now,
-            s.departures.sortBy{ _.time }.map{ _.time }
-          )
+        route.directions.map{ direction =>
+          val times = departuresByDirection.get(direction) match {
+            case Some(departures) => departures.sortBy{ _.time }.map{ _.time }
+            case None => Seq()
+          }
+
+          new DepartureModel(route.code, direction.code, stop.code, now, times)
         }
 
       }.flatten
 
-      departures.foreach{ d =>
+      departureModels.foreach{ d =>
         println("Inserting " +
           Array(now,
             d.direction,
@@ -48,11 +50,9 @@ object Main {
             d.route,
             d.departures.mkString("/")).mkString(","))
       }
-
-      DepartureRecordByTime.insertDepartures(departures)
-      DepartureRecordByStop.insertDepartures(departures)
+      DepartureRecordByTime.insertDepartures(departureModels)
+      DepartureRecordByStop.insertDepartures(departureModels)
     }
-
   }
 
 }
