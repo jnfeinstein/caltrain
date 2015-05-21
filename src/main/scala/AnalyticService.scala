@@ -40,7 +40,7 @@ trait AnalyticService extends GenericService {
         flatMap{ case (toStop, i) =>
           stops.take(i).map{ fromStop => (fromStop, toStop) }
         }.
-        map{ case (fromStop, toStop) =>
+        foreach{ case (fromStop, toStop) =>
           val (avgMinutes, numSamples) = averageTimeModels.find{ m =>
             m.toStop == toStop.code && m.fromStop == fromStop.code
           } match {
@@ -48,43 +48,56 @@ trait AnalyticService extends GenericService {
             case None => (None, 0)
           }
 
-          val fromStopDepartures = departureModels.find{ _.stop == fromStop.code } match {
+          val fromSamples = departureModels.find{ _.stop == fromStop.code } match {
             case Some(m) => m.departures
             case None => Seq()
           }
 
-          val toStopDepartures = departureModels.find{ _.stop == toStop.code } match {
+          val toSamples = departureModels.find{ _.stop == toStop.code } match {
             case Some(m) => m.departures
             case None => Seq()
           }
 
-          val minLength = math.min(fromStopDepartures.length, toStopDepartures.length)
+          val fromLength = fromSamples.length
+          val toLength = toSamples.length
 
-          val newNumSamples = numSamples + minLength
+          val (validFromSamples, validToSamples) =
+            if (fromLength < toLength) {
+              // There is another train above fromStop
+              ( fromSamples, toSamples.takeRight(fromLength) )
+            } else if (fromLength > toLength) {
+              // There is a train too far away from toStop
+              ( fromSamples.take(toLength), toSamples)
+            } else {
+              (fromSamples, toSamples)
+            }
 
-          val newAvgMinutes = if (newNumSamples > 0) {
+          val diffs = validFromSamples.zip(validToSamples).
+            map { case (from, to) =>
+              if (from < to) {
+                Some(to - from)
+              } else None
+            }.flatten
+
+          if (diffs.length > 0) {
             val prevTotalMinutes = avgMinutes match {
               case Some(n) => n * numSamples
               case None => 0
             }
+            val newNumSamples = numSamples + diffs.length
+            val newAvgMinutes = diffs.fold(prevTotalMinutes){ _ + _ } / newNumSamples
 
-            val newTotalMinutes = fromStopDepartures.takeRight(minLength).
-              zip( toStopDepartures.takeRight(minLength) ).
-              map { case (x, y) => math.abs(x - y) }.
-              fold(prevTotalMinutes){ _ + _ }
+            val model = new AverageTimeModel(
+                              route.code,
+                              direction.code,
+                              fromStop.code,
+                              toStop.code,
+                              Some(newAvgMinutes),
+                              newNumSamples)
 
-            Some(newTotalMinutes / newNumSamples)
-          } else None
-
-          new AverageTimeModel(
-            route.code,
-            direction.code,
-            fromStop.code,
-            toStop.code,
-            newAvgMinutes,
-            newNumSamples)
-        }.
-        foreach{ AverageTimeRecord.insertModel(_) }
+            AverageTimeRecord.insertModel(model)
+          }
+        }
       }
     }
   }
