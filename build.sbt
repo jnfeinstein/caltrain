@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "io.spray" %%  "spray-json" % "1.3.2",
   "io.spray" % "spray-routing-shapeless2_2.11" % "1.3.3",
   "net.jpountz.lz4" % "lz4" % "1.3.0",
-  "org.five11" %% "scala-511" % "0.0.5",
+  "org.five11" %% "scala-511" % "0.0.6",
   "org.scala-lang" % "scala-library" % "2.11.6",
   "org.slf4j" % "slf4j-api" % "1.7.12",
   "org.slf4j" % "slf4j-simple" % "1.7.12",

@@ -1,9 +1,15 @@
 package org.caltrain
 
+import akka.actor._
+import org.caltrain.db._
 import org.five11._
 import org.joda.time.DateTime
 import org.joda.time.format.{ISODateTimeFormat, DateTimeFormatter}
 import spray.json._
+
+trait GenericService {
+  implicit def actorRefFactory: ActorRefFactory
+}
 
 object Common {
   val api = new Api( System.getenv("TOKEN") )

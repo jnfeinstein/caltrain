@@ -19,3 +19,13 @@ CREATE TABLE IF NOT EXISTS caltrain.departure_samples_by_time (
   departures list<int>,
   PRIMARY KEY ( (direction, route), timestamp, stop) )
   WITH compression = { 'sstable_compression' : 'LZ4Compressor' } ;
+
+CREATE TABLE IF NOT EXISTS caltrain.average_times (
+  route text,
+  direction text,
+  fromstop text,
+  tostop text,
+  avgminutes int,
+  samples int,
+  PRIMARY KEY ( (direction, route), fromstop, tostop) )
+  WITH compression = { 'sstable_compression' : 'LZ4Compressor' } ;

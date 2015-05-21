@@ -1,6 +1,7 @@
 package org.caltrain
 
 import akka.actor._
+import org.caltrain.db._
 import org.five11._
 import org.joda.time.DateTime
 
@@ -8,12 +9,14 @@ import Common._
 
 class PollServiceActor extends Actor with PollService {
   def receive = {
-    case _ => poll
+    case _ => {
+      context.actorFor("../analytic-service") ! poll()
+    }
   }
 }
 
 trait PollService {
-  def poll = {
+  def poll(): DateTime = {
     val now = DateTime.now
 
     println("Polling - " + now)
@@ -49,5 +52,7 @@ trait PollService {
       DepartureRecordByTime.insertDepartures(departureModels)
       DepartureRecordByStop.insertDepartures(departureModels)
     }
+
+    return now
   }
 }

@@ -9,6 +9,8 @@ object Boot extends App {
   implicit val system = ActorSystem("caltrain")
   import system.dispatcher
 
+  val analyticService = system.actorOf(Props[AnalyticServiceActor], "analytic-service")
+
   val apiService = system.actorOf(Props[ApiServiceActor], "api-service")
   IO(Http) ! Http.Bind(apiService, "localhost", port = 5000)
 

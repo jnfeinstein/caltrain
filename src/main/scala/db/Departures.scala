@@ -1,11 +1,9 @@
-package org.caltrain
+package org.caltrain.db
 
-import com.websudos.phantom.connectors.{KeySpace, SimpleCassandraConnector, DefaultCassandraManager}
 import com.websudos.phantom.builder.Unspecified
 import com.websudos.phantom.builder.query._
 import com.websudos.phantom.dsl._
-import com.websudos.phantom.Manager
-import java.net.InetSocketAddress
+import org.five11._
 import org.joda.time.DateTime
 import scala.concurrent.{ Await, Future => ScalaFuture }
 
@@ -35,12 +33,7 @@ sealed class DepartureTable extends CassandraTable[DepartureTable, DepartureMode
   }
 }
 
-trait DepartureConnector extends SimpleCassandraConnector {
-  implicit val keySpace = KeySpace("caltrain")
-  override val manager = new DefaultCassandraManager( Set(new InetSocketAddress( System.getenv("CASSANDRA_HOST"), 9042) ) )
-}
-
-class DepartureRecord extends DepartureTable with DepartureConnector {
+class DepartureRecord extends DepartureTable with CaltrainConnector {
   def insertDepartureQuery(model: DepartureModel): InsertQuery[DepartureTable, DepartureModel, Unspecified] = {
     insert.value(_.route, model.route)
       .value(_.direction, model.direction)
@@ -63,12 +56,28 @@ class DepartureRecord extends DepartureTable with DepartureConnector {
 object DepartureRecordByTime extends DepartureRecord {
   override lazy val tableName = "departure_samples_by_time"
 
-  def getCurrent(direction: String, route: String): ScalaFuture[Seq[DepartureModel]] = {
-    val time = DateTime.now.minusMinutes(1)
+  def get(
+      direction: String,
+      route: String,
+      time: DateTime): ScalaFuture[Seq[DepartureModel]] = {
     select.where(_.direction eqs direction).
       and(_.route eqs route).
       and(_.timestamp gte time).
       fetch()
+  }
+
+  def get(
+      direction: Direction,
+      route: Route,
+      time: DateTime): ScalaFuture[Seq[DepartureModel]] = {
+    get(direction.code, route.code, time)
+  }
+
+  def getCurrent(
+      direction: String,
+      route: String): ScalaFuture[Seq[DepartureModel]] = {
+    val time = DateTime.now.minusMinutes(1)
+    get(direction, route, time)
   }
 }
 
