@@ -17,7 +17,7 @@ class PollServiceActor extends Actor with PollService {
 
 trait PollService {
   def poll(): DateTime = {
-    val now = DateTime.now
+    val now = DateTime.now.minuteOfHour().roundFloorCopy();
 
     println("Polling - " + now)
 
