@@ -7,7 +7,7 @@ import com.websudos.phantom.dsl._
 import com.websudos.phantom.Manager
 import java.net.InetSocketAddress
 import org.joda.time.DateTime
-import scala.concurrent.{ Future => ScalaFuture }
+import scala.concurrent.{ Await, Future => ScalaFuture }
 
 case class DepartureModel (
   route: String,
@@ -18,10 +18,10 @@ case class DepartureModel (
 )
 
 sealed class DepartureTable extends CassandraTable[DepartureTable, DepartureModel] {
-  object route extends StringColumn(this)
-  object direction extends StringColumn(this)
-  object stop extends StringColumn(this)
-  object timestamp extends DateTimeColumn(this)
+  object route extends StringColumn(this) with PrimaryKey[String]
+  object direction extends StringColumn(this) with PrimaryKey[String]
+  object stop extends StringColumn(this) with PrimaryKey[String]
+  object timestamp extends DateTimeColumn(this) with PrimaryKey[DateTime]
   object departures extends ListColumn[DepartureTable, DepartureModel, Int](this)
 
   def fromRow(row: Row): DepartureModel = {
@@ -62,8 +62,24 @@ class DepartureRecord extends DepartureTable with DepartureConnector {
 
 object DepartureRecordByTime extends DepartureRecord {
   override lazy val tableName = "departure_samples_by_time"
+
+  def getCurrent(direction: String, route: String): ScalaFuture[Seq[DepartureModel]] = {
+    val time = DateTime.now.minusMinutes(1)
+    select.where(_.direction eqs direction).
+      and(_.route eqs route).
+      and(_.timestamp gte time).
+      fetch()
+  }
 }
 
 object DepartureRecordByStop extends DepartureRecord {
   override lazy val tableName = "departure_samples_by_stop"
+
+  def getCurrent(stop: String, direction: String): ScalaFuture[Seq[DepartureModel]] = {
+    val time = DateTime.now.minusMinutes(1)
+    select.where(_.stop eqs stop).
+      and(_.direction eqs direction).
+      and(_.timestamp gte time).
+      fetch()
+  }
 }

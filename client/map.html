@@ -1,0 +1,8 @@
+<div ng-controller="MapCtrl">
+  <select ng-model="selected.route">
+    <option ng-repeat="(code, name) in routes" value="{{ code }}">{{ name }}</option>
+  </select>
+  <select ng-model="selected.direction">
+    <option ng-repeat="(code, name) in directions" value="{{ code }}">{{ name }}</option>
+  </select>
+</div>
